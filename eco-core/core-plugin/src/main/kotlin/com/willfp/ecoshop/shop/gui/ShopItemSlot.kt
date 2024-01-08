@@ -11,6 +11,7 @@ import com.willfp.eco.core.gui.slot.CustomSlot
 import com.willfp.eco.core.items.builder.modify
 import com.willfp.eco.util.formatEco
 import com.willfp.eco.util.toNiceString
+import com.willfp.ecoshop.EcoShopPlugin
 import com.willfp.ecoshop.shop.BuyStatus
 import com.willfp.ecoshop.shop.BuyType
 import com.willfp.ecoshop.shop.SellStatus
@@ -30,56 +31,60 @@ class ShopItemSlot(
 ) : CustomSlot() {
     private val slot = slot(extractItemStack(item, plugin)) {
         fun handleMainBuyClick(player: Player, menu: Menu, buyType: BuyType) {
-            val status = item.getBuyStatus(player, 1, buyType)
+            EcoShopPlugin.instance.scheduler.runGlobally {
+                val status = item.getBuyStatus(player, 1, buyType)
 
-            if (status != BuyStatus.ALLOW) {
-                player.sendMessage(
-                    plugin.langYml.getMessage("buy-status.${status.configKey}")
-                        .replace("%price%", item.getBuyPrice(buyType).getDisplay(player, 1))
-                )
-            } else {
-                if (item.getMaxBuysAtOnce(player) == 1) {
-                    item.buy(
-                        player,
-                        1,
-                        buyType,
-                        shop = menu.parentShop[player]
-                    )
-
+                if (status != BuyStatus.ALLOW) {
                     player.sendMessage(
-                        plugin.langYml.getMessage("bought-item")
-                            .replace("%item%", item.displayName)
-                            .replace("%price%", item.getBuyPrice(buyType)?.getDisplay(player) ?: "")
+                        plugin.langYml.getMessage("buy-status.${status.configKey}")
+                            .replace("%price%", item.getBuyPrice(buyType).getDisplay(player, 1))
                     )
                 } else {
-                    menu.parentShop[player]?.clickSound?.playTo(player)
-                    item.getBuyMenu(buyType).open(player, menu)
+                    if (item.getMaxBuysAtOnce(player) == 1) {
+                        item.buy(
+                            player,
+                            1,
+                            buyType,
+                            shop = menu.parentShop[player]
+                        )
+
+                        player.sendMessage(
+                            plugin.langYml.getMessage("bought-item")
+                                .replace("%item%", item.displayName)
+                                .replace("%price%", item.getBuyPrice(buyType)?.getDisplay(player) ?: "")
+                        )
+                    } else {
+                        menu.parentShop[player]?.clickSound?.playTo(player)
+                        item.getBuyMenu(buyType).open(player, menu)
+                    }
                 }
             }
         }
 
         fun handleQuickBuyClick(player: Player, menu: Menu, buyType: BuyType) {
-            val status = item.getBuyStatus(player, item.buyAmount, buyType)
+            EcoShopPlugin.instance.scheduler.runGlobally {
+                val status = item.getBuyStatus(player, item.buyAmount, buyType)
 
-            if (status != BuyStatus.ALLOW) {
-                player.sendMessage(
-                    plugin.langYml.getMessage("buy-status.${status.configKey}")
-                        .replace("%price%", item.getBuyPrice(buyType).getDisplay(player, item.buyAmount))
-                )
-            } else {
-                item.buy(
-                    player,
-                    item.buyAmount,
-                    buyType,
-                    shop = menu.parentShop[player]
-                )
+                if (status != BuyStatus.ALLOW) {
+                    player.sendMessage(
+                        plugin.langYml.getMessage("buy-status.${status.configKey}")
+                            .replace("%price%", item.getBuyPrice(buyType).getDisplay(player, item.buyAmount))
+                    )
+                } else {
+                    item.buy(
+                        player,
+                        item.buyAmount,
+                        buyType,
+                        shop = menu.parentShop[player]
+                    )
 
-                player.sendMessage(
-                    plugin.langYml.getMessage("bought-item-multiple")
-                        .replace("%amount%", item.buyAmount.toString())
-                        .replace("%item%", item.displayName)
-                        .replace("%price%", item.getBuyPrice(buyType).getDisplay(player, item.buyAmount))
-                )
+                    player.sendMessage(
+                        plugin.langYml.getMessage("bought-item-multiple")
+                            .replace("%amount%", item.buyAmount.toString())
+                            .replace("%item%", item.displayName)
+                            .replace("%price%", item.getBuyPrice(buyType).getDisplay(player, item.buyAmount))
+                    )
+                }
             }
         }
 

@@ -1,6 +1,5 @@
 package com.willfp.ecoshop.shop.gui
 
-import com.willfp.eco.core.config.updating.ConfigUpdater
 import com.willfp.eco.core.drops.DropQueue
 import com.willfp.eco.core.gui.menu
 import com.willfp.eco.core.gui.menu.Menu

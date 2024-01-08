@@ -318,12 +318,14 @@ class ShopItem(
             queue.push()
         }
 
-        for (command in commands) {
-            Bukkit.dispatchCommand(
-                Bukkit.getConsoleSender(),
-                command.replace("%player%", player.name)
-                    .replace("%amount%", amount.toString())
-            )
+        EcoShopPlugin.instance.scheduler.runGlobally {
+            for (command in commands) {
+                Bukkit.dispatchCommand(
+                    Bukkit.getConsoleSender(),
+                    command.replace("%player%", player.name)
+                        .replace("%amount%", amount.toString())
+                )
+            }
         }
 
         effects?.trigger(

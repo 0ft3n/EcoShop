@@ -1,3 +1,4 @@
+folia-supported: true
 name: EcoShop
 version: ${version}
 main: com.willfp.ecoshop.EcoShopPlugin
